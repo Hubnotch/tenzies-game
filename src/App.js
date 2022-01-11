@@ -9,19 +9,49 @@ function App() {
     for (let i = 0; i < 10; i++) {
       newDice.push({
         value: Math.ceil(Math.random() * 6),
-        isHeld: false,
+        isHeld: true,
         id: nanoid(),
       });
     }
     return newDice;
   };
-  // const newDice = allNewDice();
-  // const newDiceRoll = newDice.map(diceRoll=>({value:diceRoll, isHeld:false}))
-  // console.log(newDiceRoll)
-  // const dies = newDiceRoll.map(di=>(di.isHeld))
+
+  const holdDice = (id) => {
+    setDice(oldDice=>{
+      return oldDice.map((newDice) => {
+        return newDice.id === id ? {...newDice,isHeld: !newDice.isHeld} : newDice;
+      });
+    })
+  };
+  // const holdDice = (id) => {
+  //   setDice((oldDice) => {
+  //     const newDice = [];
+  //     for (let i = 0; i < oldDice.length; i++) {
+  //       const currentDie = oldDice[i];
+  //       if (currentDie.id === id) {
+  //         const updatedDie = {
+  //           ...currentDie,
+  //           isHeld: !currentDie.isHeld,
+  //         };
+  //         newDice.push(updatedDie);
+  //       } else {
+  //         newDice.push(currentDie);
+  //       }
+  //     }
+  //     return newDice;
+  //   });
+  // };
 
   const [dice, setDice] = useState(allNewDice);
-  const diceElements = dice.map((die) => <Die value={die.value} />);
+  const diceElements = dice.map((die) => (
+    <Die
+      value={die.value}
+      id={die.id}
+      key={die.id}
+      toggle={holdDice}
+      isHeld={die.isHeld}
+    />
+  ));
 
   const rollDice = () => {
     setDice(allNewDice());
