@@ -1,27 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Confetti from "react-confetti";
 import { nanoid } from "nanoid";
 import Die from "./Die.js";
 import "./App.css";
 
 function App() {
+  const generateNewDie = () => {
+    return {
+      value: Math.ceil(Math.random() * 6),
+      isHeld: false,
+      id: nanoid(),
+    };
+  };
+
   const allNewDice = () => {
     const newDice = [];
     for (let i = 0; i < 10; i++) {
-      newDice.push({
-        value: Math.ceil(Math.random() * 6),
-        isHeld: true,
-        id: nanoid(),
-      });
+      newDice.push(generateNewDie());
     }
     return newDice;
   };
 
   const holdDice = (id) => {
-    setDice(oldDice=>{
+    setDice((oldDice) => {
       return oldDice.map((newDice) => {
-        return newDice.id === id ? {...newDice,isHeld: !newDice.isHeld} : newDice;
+        return newDice.id === id
+          ? { ...newDice, isHeld: !newDice.isHeld }
+          : newDice;
       });
-    })
+    });
   };
   // const holdDice = (id) => {
   //   setDice((oldDice) => {
@@ -53,14 +60,41 @@ function App() {
     />
   ));
 
+  const [tenzies, setTenzies] = useState(false);
+
+  useEffect(() => {
+    const heldDice = dice.every((die) => die.isHeld === true);
+    const firstValue = dice[0].value;
+    const allValues = dice.every((die) => die.value === firstValue);
+    if (heldDice && allValues) {
+      setTenzies(true);
+      console.log("You won");
+    }
+  }, [dice]);
+
   const rollDice = () => {
-    setDice(allNewDice());
+    if (!tenzies) {
+      setDice((oldDice) =>
+        oldDice.map((die) => {
+          return die.isHeld ? die : generateNewDie();
+        })
+      );
+    } else {
+      setTenzies(false);
+      setDice(allNewDice);
+    }
   };
   return (
     <main>
+      {tenzies && <Confetti />}
+      <h1 className="title">Tenzies</h1>
+      <p className="instructions">
+        Roll until all dice are the same. Click each die to freeze it at its
+        current value between rolls.
+      </p>
       <div className="dice-container">{diceElements}</div>
       <button className="roll-dice" onClick={rollDice}>
-        Roll
+        {tenzies ? "New Game" : "Roll"}
       </button>
     </main>
   );
